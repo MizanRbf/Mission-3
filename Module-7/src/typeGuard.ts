@@ -7,7 +7,7 @@ const add = (num1: Number, num2: Number) => {
     return num1.toString() + num2.toString();
   }
 };
-console.log(add(33, "44"));
+console.log(add(33, 55));
 
 // in guard
 type NormalUser = {
