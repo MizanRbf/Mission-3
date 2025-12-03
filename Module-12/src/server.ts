@@ -9,6 +9,7 @@ app.use(express.json());
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello next level development!");
 });
+
 app.post("/", (req: Request, res: Response) => {
   console.log(req.body);
   res.status(201).json({
