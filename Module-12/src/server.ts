@@ -48,13 +48,249 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello next level development!");
 });
 
-app.post("/", (req: Request, res: Response) => {
-  console.log(req.body);
-  res.status(201).json({
-    success: true,
-    message: "Api is working",
-  });
+// users CRUD
+// POST Users
+app.post("/users", async (req: Request, res: Response) => {
+  const { name, email } = req.body;
+  try {
+    const result = await pool.query(
+      `
+      INSERT INTO users(name, email) VALUES($1,$2) RETURNING *
+      `,
+      [name, email]
+    );
+    res.status(201).json({
+      success: true,
+      message: "Data Inserted Successfully",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 });
+
+// GET Users
+app.get("/users", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM users`);
+    res.status(200).json({
+      success: true,
+      message: "Users retrieved successfully ",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+// GET Single Users
+app.get("/users/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User found",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+// UPDATE Users
+app.put("/users/:id", async (req: Request, res: Response) => {
+  const { name, email } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE users SET name=$1,email=$2 WHERE id = $3 RETURNING *`,
+      [name, email, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User Updated Successfully",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+// DELETE Users
+app.delete("/users/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "User Deleted Successfully",
+        data: null,
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+// TODOS CRUD
+// POST TODOS
+app.post("/todos", async (req: Request, res: Response) => {
+  const { user_id, title } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO todos(user_id,title) VALUES($1,$2) RETURNING *`,
+      [user_id, title]
+    );
+    res.status(200).json({
+      success: true,
+      message: "Todo Created Successfully",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+// GET TODOS
+app.get("/todos", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos`);
+    res.status(200).json({
+      success: true,
+      message: "Todos retrieved successfully ",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
+    });
+  }
+});
+
+// GET Single TODOS
+app.get("/todos/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Todos not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Todos found",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      result: false,
+      message: err.message,
+    });
+  }
+});
+
+// UPDATE TODOS
+app.put("/todos/:id", async (req: Request, res: Response) => {
+  const { user_id, title } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE todos SET user_id=$1,title=$2 WHERE id = $3 RETURNING *`,
+      [user_id, title, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Todos not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Todos Updated Successfully",
+        data: result.rows[0],
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      result: false,
+      message: err.message,
+    });
+  }
+});
+
+// DELETE TODOS
+app.delete("/todos/:id", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`DELETE FROM todos WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Todos not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Todos Deleted Successfully",
+        data: null,
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+app.use();
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
